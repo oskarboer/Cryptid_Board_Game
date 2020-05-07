@@ -84,19 +84,25 @@ while not done:
 	screen.fill((0, 0, 0))
 
 
-	coord = [[(i%12), 2*(i//12), (i%2==0)] for i in range(108)]
+	# coord = [[(i%12), 2*(i//12), (i%2==0)] for i in range(108)]
+	coord = [[(i%12), (i//12), (i%2)] for i in range(108)]
 
-	hcoord = [c[0] for c in coord]
-	vcoord = [2. * np.sin(np.radians(60)) * (c[1] - c[2]) /3. for c in coord]
+	# hcoord = [c[0] for c in coord]
+	hcoord = [1.5*c[0] for c in coord]
+	# vcoord = [2 * np.sin(np.radians(60)) * (c[1] - c[2]) /3 for c in coord]
+	vcoord = [2 * np.sin(np.radians(60)) * c[1] + c[2]*np.sin(np.radians(60)) for c in coord]
 	colors = [color[i-1] for i in some_map]
 
 
 	for x, y, c in zip(hcoord, vcoord, colors):
-		pygame.draw.polygon(screen, c, hexagon(20*x + screen_width//2, 20*y+screen_height//2, 10))
+		scale_map = 30
+		map_size_x, map_size_y = (11*1.5)*scale_map, scale_map*(8*3**0.5+3**0.5/2)
+		x = scale_map*x + screen_width//2 - map_size_x//2
+		y = scale_map*y + screen_height//2 - map_size_y//2
+		pygame.draw.polygon(screen, c, hexagon(x, y, scale_map))
 
 	pygame.display.flip()
 	clock.tick(60)
-
 
 
 
