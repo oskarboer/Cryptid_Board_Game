@@ -3,6 +3,11 @@ from matplotlib.patches import RegularPolygon
 import numpy as np
 
 import pyglet
+import pygame
+
+
+screen_width = 640
+screen_height = 480
 
 
 number2type_of_terrarian = {
@@ -46,53 +51,97 @@ some_map = arrange_map(map_arrangment)
 
 
 
-
-
-window = pyglet.window.Window()
-
-
-
-
-
 def hexagon(x, y, k=10):
 	t = (3**0.5)/2
-	out = [-0.5, t, 0.5, t, 1,0, -0.5,t, 1,0, 0.5,-t, -0.5,t, 0.5,-t, -0.5,-t, -0.5,t, -0.5,-t, -1,0]
+	out = [-0.5, t, 0.5, t, 1,0, 0.5,-t, -0.5,-t, -1,0]
 	out = [int(k*xy + x) if i%2==0 else int(k*xy + y) for i, xy in enumerate(out)]
-	return out
+	return [(out[x], out[x+1]) for x in range(0, len(out), 2)]
 
-white = 	[255]*4
-black = 	[0]*3 + [255]
-green = 	[0, 255, 0, 255]
-blue = 		[0, 0, 255, 255]
-yellow = 	[255, 255, 0, 255]
-gray = 		[211, 211, 211, 255]
-violet = 	[238, 130, 238, 255]
+
+pygame.init()
+screen = pygame.display.set_mode((screen_width, screen_height))
+done = False
+
+white = 	(255)*3
+black = 	[0]*3
+green = 	[0, 255, 0]
+blue = 		[0, 0, 255]
+yellow = 	[255, 255, 0]
+gray = 		[211, 211, 211]
+violet = 	[238, 130, 238]
 
 color = [blue, gray, green, violet, yellow]
 
-coord = [[(i%12), -2*(i//12), (i%2)] for i in range(108)]
+clock = pygame.time.Clock()
+ 
+while not done:
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT:
+			print("Exiting...")
+			done = True
 
-hcoord = [c[0] for c in coord]
-vcoord = [2. * np.sin(np.radians(60)) * (c[1] - c[2]) /3. for c in coord]
-colors = [color[i-1] for i in some_map]
-
-batch = pyglet.graphics.Batch()
-
-
-for x, y, c in zip(hcoord, vcoord, colors):
-	batch.add(12, pyglet.gl.GL_TRIANGLES, None, ('v2i', hexagon(20*x + window.width//2, 20*y + window.height//2, 10)), ('c4B', c*12))
-	# print(hexagon(20*x + window.width//2, 20*y + window.height//2, 20))
-
-# batch.add(12, pyglet.gl.GL_TRIANGLES, None, ('v2i', [290, 277, 310,277, 320,260,  290,277, 320,260, 310,242,   290,277, 310,242, 290,242,   290,277, 290,242, 280,260]), ('c4B', blue*12))
-# batch.add(6, pyglet.gl.GL_TRIANGLES, None, ('v2i', [330, 237,	350, 237,  360, 220,   350, 202,   330, 202,   320, 220]), ('c4B', gray*6))
-
-@window.event
-def on_draw():
-    window.clear()
-    batch.draw()
+        
+	screen.fill((0, 0, 0))
 
 
-pyglet.app.run()
+	coord = [[(i%12), 2*(i//12), (i%2==0)] for i in range(108)]
+
+	hcoord = [c[0] for c in coord]
+	vcoord = [2. * np.sin(np.radians(60)) * (c[1] - c[2]) /3. for c in coord]
+	colors = [color[i-1] for i in some_map]
+
+
+	for x, y, c in zip(hcoord, vcoord, colors):
+		pygame.draw.polygon(screen, c, hexagon(20*x + screen_width//2, 20*y+screen_height//2, 10))
+
+	pygame.display.flip()
+	clock.tick(60)
+
+
+
+
+# window = pyglet.window.Window()
+
+
+# def hexagon(x, y, k=10):
+# 	t = (3**0.5)/2
+# 	out = [-0.5, t, 0.5, t, 1,0, -0.5,t, 1,0, 0.5,-t, -0.5,t, 0.5,-t, -0.5,-t, -0.5,t, -0.5,-t, -1,0]
+# 	out = [int(k*xy + x) if i%2==0 else int(k*xy + y) for i, xy in enumerate(out)]
+# 	return out
+
+# white = 	[255]*4
+# black = 	[0]*3 + [255]
+# green = 	[0, 255, 0, 255]
+# blue = 		[0, 0, 255, 255]
+# yellow = 	[255, 255, 0, 255]
+# gray = 		[211, 211, 211, 255]
+# violet = 	[238, 130, 238, 255]
+
+# color = [blue, gray, green, violet, yellow]
+
+# coord = [[(i%12), -2*(i//12), (i%2)] for i in range(108)]
+
+# hcoord = [c[0] for c in coord]
+# vcoord = [2. * np.sin(np.radians(60)) * (c[1] - c[2]) /3. for c in coord]
+# colors = [color[i-1] for i in some_map]
+
+# batch = pyglet.graphics.Batch()
+
+
+# for x, y, c in zip(hcoord, vcoord, colors):
+# 	batch.add(12, pyglet.gl.GL_TRIANGLES, None, ('v2i', hexagon(20*x + window.width//2, 20*y + window.height//2, 10)), ('c4B', c*12))
+# 	# print(hexagon(20*x + window.width//2, 20*y + window.height//2, 20))
+
+# # batch.add(12, pyglet.gl.GL_TRIANGLES, None, ('v2i', [290, 277, 310,277, 320,260,  290,277, 320,260, 310,242,   290,277, 310,242, 290,242,   290,277, 290,242, 280,260]), ('c4B', blue*12))
+# # batch.add(6, pyglet.gl.GL_TRIANGLES, None, ('v2i', [330, 237,	350, 237,  360, 220,   350, 202,   330, 202,   320, 220]), ('c4B', gray*6))
+
+# @window.event
+# def on_draw():
+#     window.clear()
+#     batch.draw()
+
+
+# pyglet.app.run()
 
 
 
