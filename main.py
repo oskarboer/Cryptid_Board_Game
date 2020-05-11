@@ -77,11 +77,15 @@ clock = pygame.time.Clock()
 while not done:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
-			print("Exiting...")
+			print("Exiting pygame loop")
 			done = True
 
-        
+
 	screen.fill((0, 0, 0))
+	mouse_x, mouse_y = pygame.mouse.get_pos()
+	# print(x, y)
+	scale_map = 30
+	map_size_x, map_size_y = (11*1.5)*scale_map, scale_map*(8*3**0.5+3**0.5/2)
 
 
 	# coord = [[(i%12), 2*(i//12), (i%2==0)] for i in range(108)]
@@ -95,11 +99,12 @@ while not done:
 
 
 	for x, y, c in zip(hcoord, vcoord, colors):
-		scale_map = 30
-		map_size_x, map_size_y = (11*1.5)*scale_map, scale_map*(8*3**0.5+3**0.5/2)
 		x = scale_map*x + screen_width//2 - map_size_x//2
 		y = scale_map*y + screen_height//2 - map_size_y//2
-		pygame.draw.polygon(screen, c, hexagon(x, y, scale_map))
+		distance = ((x-mouse_x)**2 + (y - mouse_y)**2)**.5
+		if ((0, 0) != (x, y)) and distance < 3**.5*scale_map/2:
+			c = [255]*3
+		pygame.draw.polygon(screen, c, hexagon(x, y, scale_map-3))
 
 	pygame.display.flip()
 	clock.tick(60)
