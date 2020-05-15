@@ -14,7 +14,7 @@ screen_height = 480
 # 	"swamp":	4,
 # 	"desert":	5
 
-white =		(255)*3
+white =		[255]*3
 black = 	[0]*3
 green = 	[0, 255, 0]
 blue = 		[0, 0, 255]
@@ -54,7 +54,7 @@ def hexagon(x, y, k=10):
 
 def triangle(x, y, k=10):
 	t = (3**0.5)/2
-	points = [[0, 1], [-0.5, t], [-0.5, -t]]
+	points = [[0, 1], [t, -0.5], [-t, -0.5]]
 	out = [(int(k*i+x), int(k*j+y)) for i, j in points]
 	return out
 
@@ -66,6 +66,7 @@ def octagon(x, y, k=10):
 
 
 pygame.init()
+clock = pygame.time.Clock()
 screen = pygame.display.set_mode((screen_width, screen_height))
 done = False
 
@@ -73,8 +74,15 @@ done = False
 
 color = [blue, gray, green, violet, yellow]
 
-clock = pygame.time.Clock()
+# a way to find out coordinats for map (9 x 12, overall 108 places)
+coord = [[(i%12), (i//12), (i%2)] for i in range(108)]
+hcoord = [1.5*c[0] for c in coord]
+vcoord = [2 * np.sin(np.radians(60)) * c[1] + c[2]*np.sin(np.radians(60)) for c in coord]
+colors = [color[i-1] for i in some_map]
  
+map_structures = [[hcoord[x*12 + y], vcoord[x*12 + y], s, c] for x, y, s, c in map_structures]
+
+
 while not done:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -89,12 +97,6 @@ while not done:
 	map_size_x, map_size_y = (11*1.5)*scale_map, scale_map*(8*3**0.5+3**0.5/2)
 
 
-	# a way to find out coordinats for map (9 x 12, overall 108 places)
-	coord = [[(i%12), (i//12), (i%2)] for i in range(108)]
-	hcoord = [1.5*c[0] for c in coord]
-	vcoord = [2 * np.sin(np.radians(60)) * c[1] + c[2]*np.sin(np.radians(60)) for c in coord]
-	colors = [color[i-1] for i in some_map]
-
 	# draw all polygons loop
 	for x, y, c in zip(hcoord, vcoord, colors):
 		x = scale_map*x + screen_width//2 - map_size_x//2
@@ -104,6 +106,19 @@ while not done:
 		if ((0, 0) != (x, y)) and distance < 3**.5*hex_radius/2:
 			c = [255]*3
 		pygame.draw.polygon(screen, c, hexagon(x, y, hex_radius))
+
+	# draw all structures loop
+	for x, y, shape, c in map_structures:
+		x = scale_map*x + screen_width//2 - map_size_x//2
+		y = scale_map*y + screen_height//2 - map_size_y//2
+		if shape == 3:
+			pygame.draw.polygon(screen, c, triangle(x, y, scale_map//2))
+			pygame.draw.polygon(screen, black, triangle(x, y, scale_map//2), 3)
+
+		if shape == 8:
+			pygame.draw.polygon(screen, c, octagon(x, y, scale_map//2))
+			pygame.draw.polygon(screen, black, octagon(x, y, scale_map//2), 3)
+
 
 	pygame.display.flip()
 	clock.tick(60)
