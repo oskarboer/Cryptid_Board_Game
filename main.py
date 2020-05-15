@@ -1,5 +1,5 @@
 import numpy as np
-
+from math import tan, radians
 import pyglet
 import pygame
 
@@ -13,6 +13,14 @@ screen_height = 480
 # 	"forest":	3,
 # 	"swamp":	4,
 # 	"desert":	5
+
+white =		(255)*3
+black = 	[0]*3
+green = 	[0, 255, 0]
+blue = 		[0, 0, 255]
+yellow = 	[255, 255, 0]
+gray = 		[211, 211, 211]
+violet = 	[238, 130, 238]
 
 
 # Hardcoded map pieces, later would add a scanner
@@ -34,27 +42,34 @@ map_arrangment = [	map_piece_4[::-1], map_piece_1[::-1], map_piece_2[::-1],
 					map_piece_6[::-1], map_piece_3, map_piece_5[::-1]]
 
 some_map = arrange_map(map_arrangment)
+map_structures = [[0, 5, 3, white], [0, 9, 3, blue], [3, 1, 8, white], [3, 6, 8, blue], [3, 8, 3, green], [7, 9, 8, green]]
 
 
 # function to draw a hexagon, x and y are cenral coordinate, k - radius of outer circle.
 def hexagon(x, y, k=10):
 	t = (3**0.5)/2
-	out = [-0.5, t, 0.5, t, 1,0, 0.5,-t, -0.5,-t, -1,0]
-	out = [int(k*xy + x) if i%2==0 else int(k*xy + y) for i, xy in enumerate(out)]
-	return [(out[x], out[x+1]) for x in range(0, len(out), 2)]
+	points = [[-0.5, t], [0.5, t], [1,0], [0.5,-t], [-0.5,-t], [-1,0]]
+	out = [(int(k*i+x), int(k*j+y)) for i, j in points]
+	return out
+
+def triangle(x, y, k=10):
+	t = (3**0.5)/2
+	points = [[0, 1], [-0.5, t], [-0.5, -t]]
+	out = [(int(k*i+x), int(k*j+y)) for i, j in points]
+	return out
+
+def octagon(x, y, k=10):
+	t = tan(radians(22.5))
+	points = [[-t, 1], [t, 1], [1, t], [1, -t], [t, -1], [-t, -1], [-1, -t], [-1, t]]
+	out = [(int(k*i+x), int(k*j+y)) for i, j in points]
+	return out
 
 
 pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height))
 done = False
 
-white =		(255)*3
-black = 	[0]*3
-green = 	[0, 255, 0]
-blue = 		[0, 0, 255]
-yellow = 	[255, 255, 0]
-gray = 		[211, 211, 211]
-violet = 	[238, 130, 238]
+
 
 color = [blue, gray, green, violet, yellow]
 
